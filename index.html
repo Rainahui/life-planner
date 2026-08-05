@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人生规划清单 — Life Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0b0e;
+  --surface: #151419;
+  --surface-2: #1c1b22;
+  --surface-3: #24232c;
+  --border: #2e2d36;
+  --accent: #e8a838;
+  --accent-dim: #c78d2a;
+  --accent-glow: rgba(232,168,56,0.12);
+  --green: #3dd68c;
+  --green-dim: #2aad6e;
+  --red: #e85454;
+  --purple: #9b7aed;
+  --blue: #5b9cf5;
+  --pink: #e87ab4;
+  --teal: #3dd6c8;
+  --text: #e8e6e1;
+  --text-mid: #9d9ba6;
+  --text-dim: #5e5c66;
+  --font-display: 'Noto Serif SC', serif;
+  --font-body: 'Noto Sans SC', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.app{display:grid;grid-template-columns:260px 1fr 320px;grid-template-rows:auto 1fr;min-height:100vh}
+
+/* HEADER */
+.header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:16px}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent-dim));border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo svg{width:20px;height:20px}
+.header-title{font-family:var(--font-display);font-size:1.2rem;font-weight:700;letter-spacing:0.04em}
+.header-subtitle{font-size:0.73rem;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-date{font-family:var(--font-mono);font-size:0.78rem;color:var(--text-mid);padding:6px 14px;background:var(--surface-2);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.btn-add{display:flex;align-items:center;gap:6px;padding:8px 18px;background:var(--accent);color:#0c0b0e;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s ease}
+.btn-add:hover{background:#f0b848;transform:translateY(-1px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;overflow-y:auto;height:calc(100vh - 77px);position:sticky;top:77px}
+.sidebar-section{padding:0 20px;margin-bottom:28px}
+.sidebar-label{font-family:var(--font-mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:12px;padding-left:4px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s ease;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--surface-2)}
+.nav-item.active{background:var(--accent-glow);border:1px solid rgba(232,168,56,0.2)}
+.nav-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:box-shadow 0.3s ease}
+.nav-item.active .nav-dot{box-shadow:0 0 8px var(--accent)}
+.nav-text{font-size:0.88rem;font-weight:400;flex:1}
+.nav-count{font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);background:var(--surface-3);padding:2px 7px;border-radius:10px}
+.nav-sep{height:1px;background:var(--border);margin:12px 20px}
+.nav-progress{width:100%;height:3px;background:var(--surface-3);border-radius:2px;margin-top:8px;overflow:hidden}
+.nav-progress-bar{height:100%;border-radius:2px;transition:width 0.8s cubic-bezier(0.22,1,0.36,1)}
+.sidebar-stat-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 20px 12px}
+.sidebar-stat-label{font-size:0.72rem;color:var(--text-dim);margin-bottom:6px}
+.sidebar-stat-value{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--accent)}
+.sidebar-stat-sub{font-size:0.7rem;color:var(--text-dim);margin-top:4px;font-family:var(--font-mono)}
+
+/* MAIN */
+.main{padding:28px 32px;overflow-y:auto;height:calc(100vh - 77px)}
+.main-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px}
+.main-title{font-family:var(--font-display);font-size:1.6rem;font-weight:700;line-height:1.3}
+.main-title-sub{font-size:0.82rem;color:var(--text-mid);margin-top:4px}
+.main-filters{display:flex;gap:6px}
+.filter-btn{padding:5px 14px;font-size:0.75rem;font-family:var(--font-body);background:var(--surface-2);border:1px solid var(--border);border-radius:20px;color:var(--text-mid);cursor:pointer;transition:all 0.2s}
+.filter-btn.active,.filter-btn:hover{background:var(--accent-glow);border-color:rgba(232,168,56,0.3);color:var(--accent)}
+
+/* GOAL CARDS */
+.goals-list{display:flex;flex-direction:column;gap:16px}
+.goal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;transition:all 0.25s ease;animation:slideIn 0.5s ease forwards;opacity:0;position:relative;overflow:hidden}
+.goal-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0}
+.goal-card:hover{border-color:var(--surface-3);transform:translateX(4px)}
+.goal-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.goal-checkbox{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s ease;margin-right:14px;margin-top:2px}
+.goal-checkbox:hover{border-color:var(--accent);background:var(--accent-glow)}
+.goal-checkbox.checked{background:var(--green);border-color:var(--green)}
+.goal-checkbox.checked svg{opacity:1}
+.goal-checkbox svg{opacity:0;transition:opacity 0.2s}
+.goal-info{flex:1}
+.goal-title{font-size:1rem;font-weight:500;line-height:1.5;margin-bottom:4px}
+.goal-card.completed .goal-title{text-decoration:line-through;color:var(--text-dim)}
+.goal-desc{font-size:0.8rem;color:var(--text-mid);line-height:1.5}
+.goal-meta{display:flex;align-items:center;gap:16px;margin-top:14px;flex-wrap:wrap}
+.goal-tag{display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;padding:3px 10px;border-radius:12px;font-family:var(--font-mono)}
+.goal-deadline{font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono);display:flex;align-items:center;gap:4px}
+.goal-progress-wrap{flex:1;min-width:120px}
+.goal-progress-bar-bg{width:100%;height:4px;background:var(--surface-3);border-radius:2px;overflow:hidden}
+.goal-progress-bar-fill{height:100%;border-radius:2px;transition:width 0.8s cubic-bezier(0.22,1,0.36,1)}
+.goal-progress-text{font-size:0.68rem;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:3px;text-align:right}
+.goal-actions{display:flex;gap:6px;opacity:0;transition:opacity 0.2s}
+.goal-card:hover .goal-actions{opacity:1}
+.goal-action-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;color:var(--text-dim)}
+.goal-action-btn:hover{border-color:var(--accent);color:var(--accent)}
+.goal-action-btn.delete:hover{border-color:var(--red);color:var(--red)}
+
+/* RIGHT PANEL */
+.right-panel{background:var(--surface);border-left:1px solid var(--border);padding:24px 20px;overflow-y:auto;height:calc(100vh - 77px);position:sticky;top:77px}
+.panel-section{margin-bottom:28px}
+.panel-title{font-family:var(--font-mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:16px}
+.streak-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.streak-day{aspect-ratio:1;border-radius:4px;background:var(--surface-2);cursor:default;transition:all 0.2s}
+.streak-day.filled{background:var(--accent);opacity:0.9}
+.streak-day.today{border:1.5px solid var(--accent);box-shadow:0 0 6px rgba(232,168,56,0.3)}
+.streak-day:hover{transform:scale(1.15)}
+.streak-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px}
+.streak-label{text-align:center;font-size:0.6rem;color:var(--text-dim);font-family:var(--font-mono)}
+.milestone-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.milestone-item:last-child{border-bottom:none}
+.milestone-dot-wrap{display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.milestone-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.milestone-line{width:1px;flex:1;background:var(--border);margin-top:4px}
+.milestone-content{flex:1}
+.milestone-title{font-size:0.82rem;font-weight:500;margin-bottom:2px}
+.milestone-date{font-size:0.68rem;color:var(--text-dim);font-family:var(--font-mono)}
+.stats-ring-container{display:flex;align-items:center;gap:20px;padding:16px;background:var(--surface-2);border-radius:var(--radius);border:1px solid var(--border)}
+.stats-ring{position:relative;width:80px;height:80px;flex-shrink:0}
+.stats-ring svg{transform:rotate(-90deg)}
+.stats-ring-value{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--accent)}
+.stats-ring-info{flex:1}
+.stats-ring-label{font-size:0.78rem;color:var(--text-mid);margin-bottom:6px}
+.stats-ring-breakdown{display:flex;flex-direction:column;gap:4px}
+.stats-ring-row{display:flex;align-items:center;gap:6px;font-size:0.7rem}
+.stats-ring-row-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.stats-ring-row-text{color:var(--text-mid);flex:1}
+.stats-ring-row-val{font-family:var(--font-mono);color:var(--text);font-weight:500}
+.quote-card{background:linear-gradient(135deg,var(--surface-2),var(--surface-3));border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.quote-card::before{content:'"';position:absolute;top:-10px;left:12px;font-family:var(--font-display);font-size:5rem;color:var(--accent);opacity:0.08;line-height:1}
+.quote-text{font-family:var(--font-display);font-size:0.92rem;font-weight:300;line-height:1.7;color:var(--text-mid);margin-bottom:10px;position:relative;z-index:1}
+.quote-author{font-size:0.72rem;color:var(--text-dim);font-family:var(--font-mono)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn 0.3s ease}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:560px;max-width:94vw;max-height:85vh;overflow-y:auto;padding:32px;animation:slideUp 0.35s cubic-bezier(0.22,1,0.36,1)}
+.modal-title{font-family:var(--font-display);font-size:1.3rem;font-weight:700;margin-bottom:24px}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:0.78rem;color:var(--text-mid);margin-bottom:6px;font-weight:500}
+.form-input,.form-textarea,.form-select{width:100%;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:0.88rem;outline:none;transition:border-color 0.2s}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--accent)}
+.form-textarea{resize:vertical;min-height:72px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-tags{display:flex;flex-wrap:wrap;gap:8px}
+.form-tag-option{padding:5px 14px;border:1px solid var(--border);border-radius:20px;font-size:0.78rem;cursor:pointer;transition:all 0.2s;color:var(--text-mid);background:var(--surface-2)}
+.form-tag-option:hover{border-color:var(--text-dim)}
+.form-tag-option.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+.btn-cancel{padding:9px 22px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-mid);font-family:var(--font-body);font-size:0.85rem;cursor:pointer;transition:all 0.2s}
+.btn-cancel:hover{border-color:var(--text-dim)}
+.btn-submit{padding:9px 22px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#0c0b0e;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.btn-submit:hover{background:#f0b848}
+
+/* SAVINGS VIEW */
+.savings-overview{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.savings-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.savings-stat::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 0 0 60px;opacity:0.06}
+.savings-stat-label{font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.1em}
+.savings-stat-value{font-family:var(--font-mono);font-size:1.6rem;font-weight:700}
+.savings-stat-sub{font-size:0.7rem;color:var(--text-dim);margin-top:6px}
+.savings-goals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:28px}
+.savings-goal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:all 0.25s ease;animation:slideIn 0.5s ease forwards;opacity:0}
+.savings-goal-card:hover{border-color:var(--surface-3);transform:translateY(-3px)}
+.savings-goal-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.savings-goal-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.savings-goal-name{font-size:0.95rem;font-weight:600}
+.savings-goal-deadline{font-size:0.68rem;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px}
+.savings-goal-amounts{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.savings-goal-current{font-family:var(--font-mono);font-size:1.2rem;font-weight:700}
+.savings-goal-target{font-family:var(--font-mono);font-size:0.75rem;color:var(--text-dim)}
+.savings-goal-bar{width:100%;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.savings-goal-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(0.22,1,0.36,1)}
+.savings-goal-monthly{display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-dim)}
+.savings-goal-monthly-val{font-family:var(--font-mono);color:var(--text-mid);font-weight:500}
+.savings-goal-actions{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.savings-goal-btn{flex:1;padding:6px;font-size:0.72rem;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--text-mid);cursor:pointer;transition:all 0.2s;font-family:var(--font-body);text-align:center}
+.savings-goal-btn:hover{border-color:var(--accent);color:var(--accent)}
+.savings-goal-btn.primary{background:var(--accent-glow);border-color:rgba(232,168,56,0.3);color:var(--accent)}
+
+/* MONTHLY CHART */
+.monthly-chart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.monthly-chart-title{font-size:0.92rem;font-weight:600;margin-bottom:4px}
+.monthly-chart-sub{font-size:0.72rem;color:var(--text-dim);margin-bottom:20px;font-family:var(--font-mono)}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:160px;padding-bottom:28px;position:relative;border-bottom:1px solid var(--border)}
+.chart-bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.chart-bar-pair{display:flex;gap:3px;align-items:flex-end;height:130px;width:100%}
+.chart-bar{flex:1;border-radius:3px 3px 0 0;transition:height 0.8s cubic-bezier(0.22,1,0.36,1);min-height:2px;position:relative}
+.chart-bar:hover{opacity:0.8}
+.chart-bar-label{position:absolute;bottom:-24px;font-size:0.6rem;color:var(--text-dim);font-family:var(--font-mono);white-space:nowrap}
+.chart-legend{display:flex;gap:16px;margin-top:16px;justify-content:center}
+.chart-legend-item{display:flex;align-items:center;gap:6px;font-size:0.7rem;color:var(--text-mid)}
+.chart-legend-dot{width:8px;height:8px;border-radius:2px}
+
+/* MONTHLY PLAN VIEW */
+.monthly-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:28px}
+.month-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:all 0.2s;cursor:default;animation:slideIn 0.5s ease forwards;opacity:0}
+.month-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.month-card.current{border-color:var(--accent);box-shadow:0 0 12px rgba(232,168,56,0.1)}
+.month-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.month-card-name{font-family:var(--font-mono);font-size:0.82rem;font-weight:700}
+.month-card-status{font-size:0.6rem;padding:2px 8px;border-radius:10px;font-family:var(--font-mono)}
+.month-task-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.72rem;color:var(--text-mid)}
+.month-task-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.month-card-progress{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.month-card-progress-bar{width:100%;height:3px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-top:6px}
+.month-card-progress-fill{height:100%;border-radius:2px;transition:width 0.6s ease}
+.month-card-progress-text{display:flex;justify-content:space-between;font-size:0.62rem;color:var(--text-dim);font-family:var(--font-mono)}
+
+/* SMART ADJUST */
+.smart-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:28px;position:relative;overflow:hidden}
+.smart-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--green),var(--blue))}
+.smart-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.smart-panel-title{font-family:var(--font-display);font-size:1.1rem;font-weight:700}
+.btn-smart{display:flex;align-items:center;gap:6px;padding:8px 18px;background:linear-gradient(135deg,var(--accent),var(--green));color:#0c0b0e;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.3s}
+.btn-smart:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(232,168,56,0.3)}
+.smart-results{display:flex;flex-direction:column;gap:12px}
+.smart-item{display:flex;gap:14px;padding:14px;background:var(--surface-2);border-radius:var(--radius-sm);border-left:3px solid var(--border);transition:all 0.2s;animation:slideIn 0.4s ease forwards;opacity:0}
+.smart-item:hover{background:var(--surface-3)}
+.smart-item-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.smart-item-content{flex:1}
+.smart-item-title{font-size:0.82rem;font-weight:600;margin-bottom:3px}
+.smart-item-msg{font-size:0.75rem;color:var(--text-mid);line-height:1.5}
+.smart-item-action{font-size:0.7rem;color:var(--accent);margin-top:4px;cursor:pointer;font-weight:500}
+.smart-item-action:hover{text-decoration:underline}
+.smart-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.smart-summary-card{background:var(--surface-2);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.smart-summary-val{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.smart-summary-label{font-size:0.68rem;color:var(--text-dim)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state svg{width:80px;height:80px;margin-bottom:20px;opacity:0.3}
+.empty-state-text{font-size:0.92rem;color:var(--text-dim);margin-bottom:6px}
+.empty-state-sub{font-size:0.78rem;color:var(--text-dim);opacity:0.6}
+
+/* BUTTON STYLES */
+.btn-outline{padding:6px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);font-family:var(--font-body);font-size:0.78rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:4px}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+@media(max-width:1100px){.app{grid-template-columns:220px 1fr}.right-panel{display:none}}
+@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:20px 16px}.header{padding:16px}.form-row{grid-template-columns:1fr}.savings-overview{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0c0b0e" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8Z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header-title">人生规划清单</div>
+        <div class="header-subtitle">LIFE PLANNER v3.0</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-date" id="headerDate"></div>
+      <button class="btn-add" id="btnAddMain" onclick="openModal('goal')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新建目标
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">人生维度</div>
+      <div id="navList"></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">规划工具</div>
+      <div id="toolNav"></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">概览</div>
+      <div class="sidebar-stat-card">
+        <div class="sidebar-stat-label">总完成率</div>
+        <div class="sidebar-stat-value" id="totalRate">0%</div>
+        <div class="sidebar-stat-sub" id="totalSub">0 / 0 已完成</div>
+      </div>
+      <div class="sidebar-stat-card">
+        <div class="sidebar-stat-label">连续打卡</div>
+        <div class="sidebar-stat-value" id="streakCount">0 天</div>
+        <div class="sidebar-stat-sub">保持专注，持续前行</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent"></main>
+
+  <aside class="right-panel">
+    <div class="panel-section">
+      <div class="panel-title">完成概览</div>
+      <div class="stats-ring-container">
+        <div class="stats-ring">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" stroke="var(--surface-3)" stroke-width="6" fill="none"/>
+            <circle cx="40" cy="40" r="34" stroke="var(--accent)" stroke-width="6" fill="none" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" id="ringProgress"/>
+          </svg>
+          <div class="stats-ring-value" id="ringValue">0%</div>
+        </div>
+        <div class="stats-ring-info">
+          <div class="stats-ring-label">目标完成分布</div>
+          <div class="stats-ring-breakdown" id="ringBreakdown"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-title">打卡日历 · 近4周</div>
+      <div class="streak-labels">
+        <span class="streak-label">一</span><span class="streak-label">二</span>
+        <span class="streak-label">三</span><span class="streak-label">四</span>
+        <span class="streak-label">五</span><span class="streak-label">六</span>
+        <span class="streak-label">日</span>
+      </div>
+      <div class="streak-grid" id="streakGrid"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-title">里程碑</div>
+      <div id="milestones"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-title">每日箴言</div>
+      <div class="quote-card">
+        <div class="quote-text" id="quoteText"></div>
+        <div class="quote-author" id="quoteAuthor"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="modal-overlay" id="goalModal" onclick="closeModal(event,'goalModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">新建人生目标</div>
+    <div class="form-group">
+      <label class="form-label">目标名称</label>
+      <input class="form-input" id="goalTitle" placeholder="例：学会一门新语言" maxlength="50">
+    </div>
+    <div class="form-group">
+      <label class="form-label">详细描述</label>
+      <textarea class="form-textarea" id="goalDesc" placeholder="具体描述你的目标和计划..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">所属维度</label>
+        <select class="form-select" id="goalCategory">
+          <option value="career">💼 职业发展</option>
+          <option value="health">🏃 健康生活</option>
+          <option value="finance">💰 财务自由</option>
+          <option value="learn">📚 学习成长</option>
+          <option value="social">🤝 人际关系</option>
+          <option value="family">🏠 家庭生活</option>
+          <option value="hobby">🎨 兴趣爱好</option>
+          <option value="spirit">🧘 心灵修养</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">截止日期</label>
+        <input class="form-input" type="date" id="goalDeadline">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">优先级</label>
+      <div class="form-tags" id="priorityTags">
+        <div class="form-tag-option" data-val="high" onclick="selectPriority(this)">🔴 紧急重要</div>
+        <div class="form-tag-option selected" data-val="mid" onclick="selectPriority(this)">🟡 重要</div>
+        <div class="form-tag-option" data-val="low" onclick="selectPriority(this)">🔵 一般</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal(null,'goalModal')">取消</button>
+      <button class="btn-submit" onclick="addGoal()">创建目标</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVINGS GOAL MODAL -->
+<div class="modal-overlay" id="savingsModal" onclick="closeModal(event,'savingsModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">添加存款目标</div>
+    <div class="form-group">
+      <label class="form-label">目标名称</label>
+      <input class="form-input" id="svName" placeholder="例：应急基金">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">目标金额 (¥)</label>
+        <input class="form-input" type="number" id="svTarget" placeholder="100000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">当前已存 (¥)</label>
+        <input class="form-input" type="number" id="svCurrent" placeholder="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">截止日期</label>
+        <input class="form-input" type="month" id="svDeadline">
+      </div>
+      <div class="form-group">
+        <label class="form-label">图标</label>
+        <select class="form-select" id="svIcon">
+          <option value="🛡️">🛡️ 应急基金</option>
+          <option value="🏠">🏠 购房基金</option>
+          <option value="✈️">✈️ 旅行基金</option>
+          <option value="📈">📈 投资本金</option>
+          <option value="🎓">🎓 教育基金</option>
+          <option value="🚗">🚗 购车基金</option>
+          <option value="💍">💍 结婚基金</option>
+          <option value="🎯">🎯 自定义</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal(null,'savingsModal')">取消</button>
+      <button class="btn-submit" onclick="addSavingsGoal()">添加目标</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUDGET MODAL -->
+<div class="modal-overlay" id="budgetModal" onclick="closeModal(event,'budgetModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">本月预算设置</div>
+    <div class="form-group">
+      <label class="form-label">月收入 (¥)</label>
+      <input class="form-input" type="number" id="budgetIncome" placeholder="15000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">固定支出 (¥)</label>
+      <input class="form-input" type="number" id="budgetFixed" placeholder="房租、贷款、保险等">
+    </div>
+    <div class="form-group">
+      <label class="form-label">实际消费 (¥)</label>
+      <input class="form-input" type="number" id="budgetVariable" placeholder="本月实际可变消费">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal(null,'budgetModal')">取消</button>
+      <button class="btn-submit" onclick="saveBudget()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECORD SAVINGS MODAL -->
+<div class="modal-overlay" id="recordModal" onclick="closeModal(event,'recordModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">记录存款</div>
+    <div class="form-group">
+      <label class="form-label">存入金额 (¥)</label>
+      <input class="form-input" type="number" id="recordAmount" placeholder="5000">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal(null,'recordModal')">取消</button>
+      <button class="btn-submit" onclick="confirmRecord()">确认存入</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ CONSTANTS ============
+const CATEGORIES = [
+  {id:'all',label:'全部目标',icon:'',color:'var(--accent)'},
+  {id:'career',label:'职业发展',icon:'💼',color:'#e8a838'},
+  {id:'health',label:'健康生活',icon:'🏃',color:'#3dd68c'},
+  {id:'finance',label:'财务自由',icon:'💰',color:'#f5c842'},
+  {id:'learn',label:'学习成长',icon:'📚',color:'#5b9cf5'},
+  {id:'social',label:'人际关系',icon:'🤝',color:'#e87ab4'},
+  {id:'family',label:'家庭生活',icon:'🏠',color:'#3dd6c8'},
+  {id:'hobby',label:'兴趣爱好',icon:'🎨',color:'#9b7aed'},
+  {id:'spirit',label:'心灵修养',icon:'🧘',color:'#e85454'},
+];
+
+const QUOTES = [
+  {text:'不积跬步，无以至千里；不积小流，无以成江海。',author:'荀子 · 劝学'},
+  {text:'千里之行，始于足下。',author:'老子 · 道德经'},
+  {text:'天行健，君子以自强不息。',author:'周易 · 乾卦'},
+  {text:'博学之，审问之，慎思之，明辨之，笃行之。',author:'中庸'},
+  {text:'路漫漫其修远兮，吾将上下而求索。',author:'屈原 · 离骚'},
+  {text:'业精于勤，荒于嬉；行成于思，毁于随。',author:'韩愈 · 进学解'},
+  {text:'知之者不如好之者，好之者不如乐之者。',author:'论语 · 雍也'},
+  {text:'合抱之木，生于毫末；九层之台，起于累土。',author:'老子 · 道德经'},
+];
+
+// ============ STATE ============
+let currentView = 'all'; // 'all','career',...,'savings','monthly'
+let currentFilter = 'all';
+let selectedPriority = 'mid';
+let pendingRecordGoalId = null;
+let smartResults = [];
+
+// ============ DATA ============
+function loadData() {
+  goals = JSON.parse(localStorage.getItem('lp_goals') || 'null') || defaultGoals();
+  savings = JSON.parse(localStorage.getItem('lp_savings') || 'null') || defaultSavings();
+  monthlyRecords = JSON.parse(localStorage.getItem('lp_monthly') || '{}');
+}
+function saveAll() {
+  localStorage.setItem('lp_goals', JSON.stringify(goals));
+  localStorage.setItem('lp_savings', JSON.stringify(savings));
+  localStorage.setItem('lp_monthly', JSON.stringify(monthlyRecords));
+}
+
+function defaultGoals() {
+  return [
+    {id:1,title:'完成 PMP 项目管理认证',desc:'系统学习项目管理知识体系',category:'career',priority:'high',deadline:'2026-03-15',progress:65,completed:false,created:'2025-12-01',subtasks:[{t:'报名考试',d:true},{t:'完成模拟题',d:true},{t:'重点复习',d:false},{t:'参加考试',d:false}]},
+    {id:2,title:'每天跑步 5 公里',desc:'坚持晨跑，提升体能',category:'health',priority:'mid',deadline:'2026-06-30',progress:40,completed:false,created:'2026-01-01',subtasks:[{t:'第1个月坚持',d:true},{t:'配速提升至6min',d:false},{t:'完成半马',d:false}]},
+    {id:3,title:'储蓄 10 万元应急基金',desc:'每月固定储蓄',category:'finance',priority:'high',deadline:'2026-12-31',progress:30,completed:false,created:'2026-01-01',subtasks:[{t:'制定预算',d:true},{t:'开设专项账户',d:true},{t:'存入5万',d:false},{t:'达成10万',d:false}]},
+    {id:4,title:'阅读 24 本经典书籍',desc:'每月 2 本',category:'learn',priority:'mid',deadline:'2026-12-31',progress:25,completed:false,created:'2026-01-01',subtasks:[{t:'制定书单',d:true},{t:'完成Q1',d:true},{t:'完成上半年',d:false},{t:'全年24本',d:false}]},
+    {id:5,title:'学会弹吉他',desc:'自弹自唱 10 首曲目',category:'hobby',priority:'low',deadline:'2026-09-01',progress:15,completed:false,created:'2026-02-01',subtasks:[{t:'购买吉他',d:true},{t:'基础和弦',d:false},{t:'第一首完整曲',d:false}]},
+    {id:6,title:'每周给家人打电话',desc:'保持紧密联系',category:'family',priority:'mid',deadline:'',progress:80,completed:false,created:'2026-01-01',subtasks:[{t:'建立习惯',d:true},{t:'持续3个月',d:true},{t:'持续半年',d:false}]},
+    {id:7,title:'每天冥想 15 分钟',desc:'提升专注力与内心平静',category:'spirit',priority:'low',deadline:'',progress:50,completed:false,created:'2026-01-15',subtasks:[{t:'学会方法',d:true},{t:'坚持21天',d:true},{t:'养成习惯',d:false}]},
+    {id:8,title:'建立个人技术博客',desc:'分享学习笔记，打造个人品牌',category:'career',priority:'mid',deadline:'2026-04-30',progress:100,completed:true,created:'2025-11-01',subtasks:[{t:'搭建站点',d:true},{t:'发布10篇',d:true},{t:'1000访问',d:true}]},
+  ];
+}
+
+function defaultSavings() {
+  return {
+    monthlyIncome: 15000,
+    fixedExpenses: 5000,
+    goals: [
+      {id:1,name:'应急基金',icon:'🛡️',target:100000,current:32000,deadline:'2026-12',color:'#e8a838'},
+      {id:2,name:'旅行基金',icon:'✈️',target:30000,current:8000,deadline:'2026-09',color:'#5b9cf5'},
+      {id:3,name:'投资启动金',icon:'📈',target:200000,current:45000,deadline:'2027-06',color:'#3dd68c'},
+    ]
+  };
+}
+
+let goals, savings, monthlyRecords;
+loadData();
+
+// ============ SMART ADJUSTMENT ENGINE ============
+function runSmartAdjustment() {
+  smartResults = [];
+  const now = new Date();
+  const cm = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+  // 1. Analyze active goals
+  goals.filter(g => !g.completed).forEach(g => {
+    if (!g.deadline) {
+      smartResults.push({type:'info',icon:'📌',title:g.title,msg:'未设截止日期，建议设定明确的时间节点以提高完成率。',action:'设定截止日期',actionFn:()=>{alert('请编辑目标设定截止日期');},borderColor:'var(--blue)'});
+      return;
+    }
+    const dl = new Date(g.deadline);
+    const cr = new Date(g.created);
+    const totalMs = dl - cr;
+    const elapsedMs = now - cr;
+    const timePct = totalMs > 0 ? Math.min(100, Math.round(elapsedMs / totalMs * 100)) : 100;
+    const diff = g.progress - timePct;
+    const daysLeft = Math.ceil((dl - now) / 86400000);
+
+    if (diff > 15) {
+      smartResults.push({type:'ahead',icon:'🚀',title:g.title,msg:`进度超前 ${diff}%（实际 ${g.progress}% / 时间 ${timePct}%），剩余 ${daysLeft} 天。建议：提高目标难度或提前截止日期。`,action:'加速推进',actionFn:()=>{g.deadline = new Date(now.getTime()+daysLeft*0.5*86400000).toISOString().slice(0,10);saveAll();render();},borderColor:'var(--green)'});
+    } else if (diff < -15) {
+      const needed = Math.ceil((100 - g.progress) / Math.max(1, daysLeft) * 30);
+      smartResults.push({type:'behind',icon:'⚠️',title:g.title,msg:`进度落后 ${Math.abs(diff)}%（实际 ${g.progress}% / 时间 ${timePct}%），剩余 ${daysLeft} 天。建议：每月至少推进 ${needed}%，或将截止日期延长。`,action:'延长截止日期',actionFn:()=>{const nd=new Date(dl);nd.setMonth(nd.getMonth()+1);g.deadline=nd.toISOString().slice(0,10);saveAll();render();},borderColor:'var(--red)'});
+    } else {
+      // Generate auto subtasks for current month
+      const monthTarget = Math.ceil((100 - g.progress) / Math.max(1, Math.ceil(daysLeft/30)));
+      smartResults.push({type:'ok',icon:'✅',title:g.title,msg:`进度正常（${g.progress}% / ${timePct}%），本月建议推进 ${monthTarget}%。`,action:'查看本月任务',borderColor:'var(--accent)'});
+    }
+  });
+
+  // 2. Analyze savings
+  const surplus = savings.monthlyIncome - savings.fixedExpenses;
+  const totalTarget = savings.goals.reduce((s,g) => s + Math.max(0, g.target - g.current), 0);
+  const totalGoals = savings.goals.length;
+  if (totalGoals > 0) {
+    const avgPerGoal = Math.ceil(surplus * 0.6 / totalGoals);
+    const totalMonths = savings.goals.reduce((s,g) => {
+      const dl = g.deadline ? new Date(g.deadline+'-01') : new Date(now.getFullYear()+1, 11, 1);
+      return s + Math.max(1, Math.ceil((dl - now) / 2592000000));
+    }, 0) / totalGoals;
+
+    savings.goals.forEach(g => {
+      const remaining = g.target - g.current;
+      if (remaining <= 0) return;
+      const dl = g.deadline ? new Date(g.deadline+'-01') : new Date(now.getFullYear()+1,11,1);
+      const monthsLeft = Math.max(1, Math.ceil((dl - now) / 2592000000));
+      const neededPerMonth = Math.ceil(remaining / monthsLeft);
+      const canAfford = surplus * 0.4 / totalGoals;
+
+      if (neededPerMonth > canAfford * 1.5) {
+        smartResults.push({type:'savings_warn',icon:'💸',title:`${g.icon} ${g.name}`,msg:`每月需存 ¥${neededPerMonth.toLocaleString()}（剩余 ${monthsLeft} 月），但预算仅能分配 ¥${Math.round(canAfford).toLocaleString()}/月。建议延长截止日期或增加收入来源。`,action:'调整存款计划',actionFn:()=>{const nd=new Date(dl);nd.setMonth(nd.getMonth()+Math.ceil(monthsLeft*0.5));g.deadline=nd.toISOString().slice(0,7);saveAll();render();},borderColor:'var(--pink)'});
+      } else if (neededPerMonth < canAfford * 0.5) {
+        smartResults.push({type:'savings_good',icon:'💰',title:`${g.icon} ${g.name}`,msg:`每月仅需 ¥${neededPerMonth.toLocaleString()} 即可按时完成，预算充足。可将多余 ¥${Math.round(canAfford-neededPerMonth).toLocaleString()}/月 分配给其他目标。`,action:'优化分配',borderColor:'var(--green)'});
+      } else {
+        smartResults.push({type:'savings_ok',icon:'📊',title:`${g.icon} ${g.name}`,msg:`每月需存 ¥${neededPerMonth.toLocaleString()}，预算匹配，按计划执行即可。`,action:'',borderColor:'var(--accent)'});
+      }
+    });
+  }
+
+  // 3. Monthly balance
+  const lastMonthKey = Object.keys(monthlyRecords).sort().pop();
+  if (lastMonthKey) {
+    const rec = monthlyRecords[lastMonthKey];
+    if (rec.saved < rec.target * 0.8) {
+      const shortfall = rec.target - rec.saved;
+      smartResults.unshift({type:'monthly_warn',icon:'📉',title:`${lastMonthKey} 存款未达标`,msg:`目标 ¥${rec.target.toLocaleString()}，实际 ¥${rec.saved.toLocaleString()}，差额 ¥${shortfall.toLocaleString()}。建议本月节省等额开支弥补。`,action:'记录本月数据',actionFn:()=>{openModal('budget');},borderColor:'var(--red)'});
+    }
+  }
+
+  // 4. Auto-generate monthly plan
+  generateMonthlyPlan();
+
+  render();
+}
+
+function generateMonthlyPlan() {
+  const now = new Date();
+  const plans = {};
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    const tasks = [];
+    goals.filter(g => !g.completed).forEach(g => {
+      if (g.deadline) {
+        const dl = new Date(g.deadline);
+        if (dl >= d && (dl.getFullYear() !== now.getFullYear() || dl.getMonth() !== now.getMonth() + i || i === 0)) {
+          const remaining = 100 - g.progress;
+          const monthsLeft = Math.max(1, Math.ceil((dl - d) / 2592000000));
+          const monthPct = Math.min(remaining, Math.ceil(remaining / monthsLeft));
+          tasks.push({goalId:g.id,title:g.title,monthPct,category:g.category,color:CATEGORIES.find(c=>c.id===g.category)?.color||'var(--accent)'});
+        }
+      } else if (i < 3) {
+        tasks.push({goalId:g.id,title:g.title,monthPct:5,category:g.category,color:CATEGORIES.find(c=>c.id===g.category)?.color||'var(--accent)'});
+      }
+    });
+    // Savings tasks
+    savings.goals.forEach(g => {
+      const remaining = g.target - g.current;
+      if (remaining > 0) {
+        const dl = g.deadline ? new Date(g.deadline+'-01') : new Date(now.getFullYear()+1,11,1);
+        const monthsLeft = Math.max(1, Math.ceil((dl - d) / 2592000000));
+        const monthlySave = Math.ceil(remaining / monthsLeft);
+        tasks.push({goalId:'sv_'+g.id,title:`存入 ¥${monthlySave.toLocaleString()} → ${g.name}`,monthPct:0,isSaving:true,color:g.color});
+      }
+    });
+    plans[key] = {tasks, completed: i > 0 ? Math.random() * 40 + (i > 3 ? 60 : 20) : 0};
+  }
+  monthlyRecords._plans = plans;
+}
+
+// ============ RENDER ============
+function render() {
+  renderNav();
+  renderToolNav();
+  renderMain();
+  renderStats();
+  renderStreak();
+  renderMilestones();
+  renderQuote();
+  updateStreakCount();
+}
+
+function renderNav() {
+  const nav = document.getElementById('navList');
+  nav.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const count = cat.id === 'all' ? goals.length : goals.filter(g=>g.category===cat.id).length;
+    const active = currentView === cat.id;
+    const el = document.createElement('div');
+    el.className = 'nav-item' + (active ? ' active' : '');
+    el.onclick = () => { currentView = cat.id; currentFilter = 'all'; document.getElementById('btnAddMain').style.display = ''; document.getElementById('btnAddMain').onclick = () => openModal('goal'); document.getElementById('btnAddMain').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新建目标'; render(); };
+    el.innerHTML = `<div class="nav-dot" style="background:${cat.color}"></div><span class="nav-text">${cat.icon ? cat.icon+' ':''}${cat.label}</span><span class="nav-count">${count}</span>`;
+    nav.appendChild(el);
+  });
+}
+
+function renderToolNav() {
+  const nav = document.getElementById('toolNav');
+  const tools = [
+    {id:'savings',label:'存款计划',icon:'💰',color:'var(--accent)'},
+    {id:'monthly',label:'月度规划',icon:'📅',color:'var(--blue)'},
+    {id:'smart',label:'智能调整',icon:'🤖',color:'var(--green)'},
+  ];
+  nav.innerHTML = '';
+  tools.forEach(t => {
+    const active = currentView === t.id;
+    const el = document.createElement('div');
+    el.className = 'nav-item' + (active ? ' active' : '');
+    el.onclick = () => {
+      if (t.id === 'smart') { runSmartAdjustment(); currentView = 'monthly'; }
+      else { currentView = t.id; }
+      document.getElementById('btnAddMain').style.display = t.id === 'savings' ? '' : (t.id === 'monthly' ? 'none' : 'none');
+      document.getElementById('btnAddMain').onclick = t.id === 'savings' ? () => openModal('savings') : null;
+      document.getElementById('btnAddMain').innerHTML = t.id === 'savings' ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 添加存款目标' : '';
+      render();
+    };
+    el.innerHTML = `<div class="nav-dot" style="background:${t.color}"></div><span class="nav-text">${t.icon} ${t.label}</span>`;
+    nav.appendChild(el);
+  });
+}
+
+function renderMain() {
+  const main = document.getElementById('mainContent');
+  if (currentView === 'savings') { renderSavingsView(main); return; }
+  if (currentView === 'monthly') { renderMonthlyView(main); return; }
+  renderGoalsView(main);
+}
+
+// --- GOALS VIEW ---
+function renderGoalsView(container) {
+  let filtered = currentView === 'all' ? [...goals] : goals.filter(g=>g.category===currentView);
+  if (currentFilter==='active') filtered = filtered.filter(g=>!g.completed);
+  if (currentFilter==='done') filtered = filtered.filter(g=>g.completed);
+  const pri={high:0,mid:1,low:2};
+  filtered.sort((a,b)=>{if(a.completed!==b.completed)return a.completed?1:-1;return (pri[a.priority]||1)-(pri[b.priority]||1);});
+  const cat = CATEGORIES.find(c=>c.id===currentView);
+  const subMap={all:'规划你的人生蓝图',career:'提升专业价值，拓展职业边界',health:'科学运动，合理饮食',finance:'理性规划，财务自由',learn:'终身学习，持续进化',social:'高质量人际关系',family:'经营温暖家庭',hobby:'探索兴趣，丰富人生',spirit:'修心养性，内在平和'};
+
+  let html = `<div class="main-header"><div><div class="main-title">${cat?(cat.icon?cat.icon+' ':''):''}${cat?cat.label:'全部目标'}</div><div class="main-title-sub">${subMap[currentView]||''}</div></div><div class="main-filters"><button class="filter-btn ${currentFilter==='all'?'active':''}" onclick="setFilter('all',this)">全部</button><button class="filter-btn ${currentFilter==='active'?'active':''}" onclick="setFilter('active',this)">进行中</button><button class="filter-btn ${currentFilter==='done'?'active':''}" onclick="setFilter('done',this)">已完成</button></div></div>`;
+
+  if (filtered.length===0) {
+    html += `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg><div class="empty-state-text">暂无目标</div><div class="empty-state-sub">点击右上角「新建目标」开始规划</div></div>`;
+  } else {
+    html += '<div class="goals-list">';
+    filtered.forEach((g,i) => {
+      const ci = CATEGORIES.find(c=>c.id===g.category);
+      const pl={high:'🔴 紧急重要',mid:'🟡 重要',low:'🔵 一般'};
+      const pb={high:'rgba(232,84,84,0.1)',mid:'rgba(232,168,56,0.1)',low:'rgba(91,156,245,0.1)'};
+      const pc={high:'var(--red)',mid:'var(--accent)',low:'var(--blue)'};
+      const overdue=g.deadline&&!g.completed&&new Date(g.deadline)<new Date();
+      html += `<div class="goal-card ${g.completed?'completed':''}" style="animation-delay:${i*0.08}s">
+        <style>.goal-card:nth-child(${i+1})::before{background:${ci?.color||'var(--accent)'}}</style>
+        <div class="goal-card-top">
+          <div class="goal-checkbox ${g.completed?'checked':''}" onclick="toggleGoal(${g.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0c0b0e" stroke-width="3" stroke-linecap="round"><polyline points="4 12 9 17 20 6"/></svg></div>
+          <div class="goal-info"><div class="goal-title">${g.title}</div>${g.desc?`<div class="goal-desc">${g.desc}</div>`:''}</div>
+          <div class="goal-actions">
+            <button class="goal-action-btn" onclick="editProgress(${g.id})" title="更新进度"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20V16"/></svg></button>
+            <button class="goal-action-btn delete" onclick="deleteGoal(${g.id})" title="删除"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6V20a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>
+          </div>
+        </div>
+        <div class="goal-meta">
+          <span class="goal-tag" style="background:${pb[g.priority]};color:${pc[g.priority]}">${pl[g.priority]}</span>
+          <span class="goal-tag" style="background:rgba(155,122,237,0.1);color:${ci?.color||'var(--accent)'}">${ci?.icon||''} ${ci?.label||''}</span>
+          ${g.deadline?`<span class="goal-deadline" style="${overdue?'color:var(--red)':''}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${g.deadline}${overdue?' (已逾期)':''}</span>`:''}
+          <div class="goal-progress-wrap"><div class="goal-progress-text">${g.progress}%</div><div class="goal-progress-bar-bg"><div class="goal-progress-bar-fill" style="width:${g.progress}%;background:${g.completed?'var(--green)':ci?.color||'var(--accent)'}"></div></div></div>
+        </div>`;
+      if (g.subtasks?.length) {
+        html += `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">`;
+        g.subtasks.forEach((st,si) => {
+          html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer" onclick="toggleSubtask(${g.id},${si})">
+            <div style="width:16px;height:16px;border-radius:4px;border:1.5px solid ${st.d?'var(--green)':'var(--border)'};background:${st.d?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">${st.d?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0c0b0e" stroke-width="3" stroke-linecap="round"><polyline points="4 12 9 17 20 6"/></svg>':''}</div>
+            <span style="font-size:0.8rem;color:${st.d?'var(--text-dim)':'var(--text-mid)'};${st.d?'text-decoration:line-through':''}">${st.t}</span></div>`;
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// --- SAVINGS VIEW ---
+function renderSavingsView(container) {
+  const surplus = savings.monthlyIncome - savings.fixedExpenses;
+  const totalSaved = savings.goals.reduce((s,g)=>s+g.current,0);
+  const totalTarget = savings.goals.reduce((s,g)=>s+g.target,0);
+  const overallPct = totalTarget>0?Math.round(totalSaved/totalTarget*100):0;
+
+  let html = `<div class="main-header"><div><div class="main-title">💰 存款计划</div><div class="main-title-sub">规划财务目标，掌控经济自由</div></div><button class="btn-outline" onclick="openModal('budget')">⚙️ 设置预算</button></div>`;
+
+  // Overview cards
+  html += `<div class="savings-overview">
+    <div class="savings-stat"><div class="savings-stat-label">月收入</div><div class="savings-stat-value" style="color:var(--green)">¥${savings.monthlyIncome.toLocaleString()}</div><div class="savings-stat-sub">税后到手</div></div>
+    <div class="savings-stat"><div class="savings-stat-label">固定支出</div><div class="savings-stat-value" style="color:var(--red)">¥${savings.fixedExpenses.toLocaleString()}</div><div class="savings-stat-sub">房租 · 贷款 · 保险</div></div>
+    <div class="savings-stat"><div class="savings-stat-label">月结余</div><div class="savings-stat-value" style="color:${surplus>0?'var(--accent)':'var(--red)'}">¥${surplus.toLocaleString()}</div><div class="savings-stat-sub">可用于储蓄和消费</div></div>
+  </div>`;
+
+  // Overall progress
+  html += `<div class="smart-summary" style="margin-bottom:28px">
+    <div class="smart-summary-card"><div class="smart-summary-val" style="color:var(--accent)">${overallPct}%</div><div class="smart-summary-label">总存款进度</div></div>
+    <div class="smart-summary-card"><div class="smart-summary-val" style="color:var(--green)">¥${totalSaved.toLocaleString()}</div><div class="smart-summary-label">已存总额</div></div>
+    <div class="smart-summary-card"><div class="smart-summary-val" style="color:var(--text-mid)">¥${totalTarget.toLocaleString()}</div><div class="smart-summary-label">目标总额</div></div>
+  </div>`;
+
+  // Savings goals
+  html += '<div class="savings-goals-grid">';
+  savings.goals.forEach((g,i) => {
+    const remaining = g.target - g.current;
+    const pct = g.target > 0 ? Math.min(100, Math.round(g.current / g.target * 100)) : 0;
+    const dl = g.deadline ? new Date(g.deadline+'-01') : null;
+    const monthsLeft = dl ? Math.max(1, Math.ceil((dl - new Date()) / 2592000000)) : 12;
+    const monthlyNeeded = remaining > 0 ? Math.ceil(remaining / monthsLeft) : 0;
+    html += `<div class="savings-goal-card" style="animation-delay:${i*0.1}s">
+      <div class="savings-goal-header">
+        <div class="savings-goal-icon" style="background:${g.color}22">${g.icon}</div>
+        <div><div class="savings-goal-name">${g.name}</div><div class="savings-goal-deadline">${g.deadline||'无期限'} · 剩余 ${monthsLeft} 个月</div></div>
+      </div>
+      <div class="savings-goal-amounts"><div class="savings-goal-current" style="color:${g.color}">¥${g.current.toLocaleString()}</div><div class="savings-goal-target">/ ¥${g.target.toLocaleString()}</div></div>
+      <div class="savings-goal-bar"><div class="savings-goal-bar-fill" style="width:${pct}%;background:${g.color}"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:0.72rem;color:var(--text-dim)">${pct}% 已完成</span><span style="font-size:0.72rem;color:var(--text-dim)">还需 ¥${remaining.toLocaleString()}</span></div>
+      <div class="savings-goal-monthly"><span>每月需存</span><span class="savings-goal-monthly-val">¥${monthlyNeeded.toLocaleString()}</span></div>
+      <div class="savings-goal-actions">
+        <button class="savings-goal-btn primary" onclick="openRecordModal(${g.id})">💳 记录存款</button>
+        <button class="savings-goal-btn" onclick="deleteSavingsGoal(${g.id})">🗑️ 删除</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // Monthly breakdown chart
+  html += renderSavingsChart();
+
+  container.innerHTML = html;
+}
+
+function renderSavingsChart() {
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  const surplus = savings.monthlyIncome - savings.fixedExpenses;
+  const targetPerMonth = Math.round(surplus * 0.6);
+  const maxVal = Math.max(targetPerMonth * 1.5, 10000);
+  const records = monthlyRecords;
+
+  let bars = '';
+  months.forEach(m => {
+    const rec = records[m];
+    const actual = rec ? rec.saved : (m <= now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0') ? Math.round(targetPerMonth * (0.7 + Math.random()*0.5)) : 0);
+    const h1 = Math.max(2, actual / maxVal * 120);
+    const h2 = Math.max(2, targetPerMonth / maxVal * 120);
+    bars += `<div class="chart-bar-group"><div class="chart-bar-pair"><div class="chart-bar" style="height:${h1}px;background:var(--accent)" title="实际 ¥${actual.toLocaleString()}"></div><div class="chart-bar" style="height:${h2}px;background:var(--surface-3);border:1px solid var(--border)" title="目标 ¥${targetPerMonth.toLocaleString()}"></div></div><span class="chart-bar-label">${m.slice(5)}月</span></div>`;
+  });
+
+  return `<div class="monthly-chart"><div class="monthly-chart-title">月度储蓄趋势</div><div class="monthly-chart-sub">近 6 个月实际存款 vs 目标</div><div class="chart-bars">${bars}</div><div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--accent)"></div>实际存款</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--surface-3);border:1px solid var(--border)"></div>月度目标 ¥${targetPerMonth.toLocaleString()}</div></div></div>`;
+}
+
+// --- MONTHLY VIEW ---
+function renderMonthlyView(container) {
+  const now = new Date();
+  let html = `<div class="main-header"><div><div class="main-title">📅 月度规划 & 智能调整</div><div class="main-title-sub">基于当前进度，智能生成和调整你的每月计划</div></div><button class="btn-smart" onclick="runSmartAdjustment()">🤖 运行智能分析</button></div>`;
+
+  // Smart results
+  if (smartResults.length > 0) {
+    html += `<div class="smart-panel" style="animation:slideIn 0.4s ease forwards">
+      <div class="smart-panel-header"><div class="smart-panel-title">🧠 智能分析报告</div><span style="font-size:0.7rem;color:var(--text-dim);font-family:var(--font-mono)">${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}</span></div>
+      <div class="smart-summary">
+        <div class="smart-summary-card"><div class="smart-summary-val" style="color:var(--green)">${smartResults.filter(r=>r.type==='ahead'||r.type==='ok'||r.type==='savings_good'||r.type==='savings_ok').length}</div><div class="smart-summary-label">正常/超前</div></div>
+        <div class="smart-summary-card"><div class="smart-summary-val" style="color:var(--red)">${smartResults.filter(r=>r.type==='behind'||r.type==='monthly_warn'||r.type==='savings_warn').length}</div><div class="smart-summary-label">需关注</div></div>
+        <div class="smart-summary-card"><div class="smart-summary-val" style="color:var(--blue)">${smartResults.filter(r=>r.type==='info').length}</div><div class="smart-summary-label">待完善</div></div>
+      </div>
+      <div class="smart-results">`;
+    smartResults.forEach((r,i) => {
+      html += `<div class="smart-item" style="animation-delay:${i*0.06}s;border-left-color:${r.borderColor}">
+        <div class="smart-item-icon" style="background:${r.borderColor}18">${r.icon}</div>
+        <div class="smart-item-content">
+          <div class="smart-item-title">${r.title}</div>
+          <div class="smart-item-msg">${r.msg}</div>
+          ${r.action?`<div class="smart-item-action" onclick="smartResults[${i}].actionFn&&smartResults[${i}].actionFn()">→ ${r.action}</div>`:''}
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // Monthly timeline
+  const plans = monthlyRecords._plans || {};
+  html += '<div class="monthly-grid">';
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const isCurrent = i === 0;
+    const plan = plans[key];
+    const taskList = plan?.tasks || [];
+    const completedPct = isCurrent ? Math.round(goals.filter(g=>g.completed).length / Math.max(1,goals.length) * 100) : (plan?.completed || 0);
+
+    html += `<div class="month-card ${isCurrent?'current':''}" style="animation-delay:${i*0.08}s">
+      <div class="month-card-header">
+        <div class="month-card-name">${d.getFullYear()} ${monthNames[d.getMonth()]}</div>
+        <div class="month-card-status" style="background:${isCurrent?'var(--accent-glow)':'var(--surface-2)'};color:${isCurrent?'var(--accent)':'var(--text-dim)'};border:${isCurrent?'1px solid rgba(232,168,56,0.3)':'1px solid var(--border)'}">${isCurrent?'本月':i===1?'下月':'计划'}</div>
+      </div>`;
+    if (taskList.length > 0) {
+      taskList.slice(0,5).forEach(t => {
+        html += `<div class="month-task-item"><div class="month-task-dot" style="background:${t.color}"></div><span>${t.title}</span></div>`;
+      });
+      if (taskList.length > 5) html += `<div style="font-size:0.65rem;color:var(--text-dim);padding:2px 0">+${taskList.length-5} 项更多...</div>`;
+    } else {
+      html += `<div style="font-size:0.72rem;color:var(--text-dim);padding:8px 0">暂无计划</div>`;
+    }
+    html += `<div class="month-card-progress"><div class="month-card-progress-text"><span>进度</span><span>${Math.round(completedPct)}%</span></div><div class="month-card-progress-bar"><div class="month-card-progress-fill" style="width:${completedPct}%;background:${isCurrent?'var(--accent)':'var(--text-dim)'}"></div></div></div></div>`;
+  }
+  html += '</div>';
+
+  // Auto-adjust recommendations
+  html += `<div class="smart-panel" style="border-left:3px solid var(--blue);background:linear-gradient(135deg,var(--surface),var(--surface-2))">
+    <div class="smart-panel-header"><div class="smart-panel-title">📋 本月自动生成任务</div></div>
+    <div style="font-size:0.82rem;color:var(--text-mid);line-height:1.8">`;
+  goals.filter(g=>!g.completed).forEach(g => {
+    const ci = CATEGORIES.find(c=>c.id===g.category);
+    const remaining = 100 - g.progress;
+    const monthsLeft = g.deadline ? Math.max(1, Math.ceil((new Date(g.deadline)-now)/2592000000)) : 6;
+    const monthTarget = Math.ceil(remaining / monthsLeft);
+    html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1rem">${ci?.icon||'📌'}</span>
+      <span style="flex:1;font-size:0.82rem">${g.title}</span>
+      <span style="font-size:0.72rem;font-family:var(--font-mono);color:var(--accent);background:var(--accent-glow);padding:2px 8px;border-radius:10px">本月 +${monthTarget}%</span>
+    </div>`;
+  });
+  savings.goals.forEach(g => {
+    const remaining = g.target - g.current;
+    if (remaining <= 0) return;
+    const dl = g.deadline ? new Date(g.deadline+'-01') : new Date(now.getFullYear()+1,11,1);
+    const ml = Math.max(1, Math.ceil((dl-now)/2592000000));
+    const mp = Math.ceil(remaining/ml);
+    html += `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1rem">${g.icon}</span>
+      <span style="flex:1;font-size:0.82rem">${g.name}</span>
+      <span style="font-size:0.72rem;font-family:var(--font-mono);color:${g.color};background:${g.color}18;padding:2px 8px;border-radius:10px">存入 ¥${mp.toLocaleString()}</span>
+    </div>`;
+  });
+  html += '</div></div>';
+
+  container.innerHTML = html;
+}
+
+// ============ RIGHT PANEL ============
+function renderStats() {
+  const total=goals.length, done=goals.filter(g=>g.completed).length;
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('totalRate').textContent=pct+'%';
+  document.getElementById('totalSub').textContent=`${done} / ${total} 已完成`;
+  document.getElementById('ringProgress').style.strokeDashoffset=213.6-(213.6*pct/100);
+  document.getElementById('ringValue').textContent=pct+'%';
+  const bd=document.getElementById('ringBreakdown');
+  bd.innerHTML='';
+  CATEGORIES.filter(c=>c.id!=='all').forEach(cat=>{
+    const cnt=goals.filter(g=>g.category===cat.id).length;
+    if(!cnt)return;
+    const dn=goals.filter(g=>g.category===cat.id&&g.completed).length;
+    bd.innerHTML+=`<div class="stats-ring-row"><div class="stats-ring-row-dot" style="background:${cat.color}"></div><span class="stats-ring-row-text">${cat.label}</span><span class="stats-ring-row-val">${dn}/${cnt}</span></div>`;
+  });
+}
+
+function renderStreak() {
+  const grid=document.getElementById('streakGrid');
+  grid.innerHTML='';
+  const today=new Date();
+  const start=new Date(today);
+  start.setDate(start.getDate()-27-((start.getDay()+6)%7));
+  const sd=JSON.parse(localStorage.getItem('lp_streak')||'{}');
+  for(let i=0;i<28;i++){
+    const d=new Date(start);d.setDate(d.getDate()+i);
+    const key=d.toISOString().slice(0,10);
+    const isToday=key===today.toISOString().slice(0,10);
+    const el=document.createElement('div');
+    el.className='streak-day'+(sd[key]?' filled':'')+(isToday?' today':'');
+    el.title=key;
+    el.onclick=()=>{sd[key]=!sd[key];localStorage.setItem('lp_streak',JSON.stringify(sd));renderStreak();updateStreakCount();};
+    grid.appendChild(el);
+  }
+}
+
+function renderMilestones() {
+  const ms=document.getElementById('milestones');
+  const completed=goals.filter(g=>g.completed);
+  const upcoming=goals.filter(g=>!g.completed&&g.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,3);
+  const items=[...completed.map(g=>({title:g.title,date:'已完成',color:'var(--green)',done:true})),...upcoming.map(g=>({title:g.title,date:g.deadline,color:CATEGORIES.find(c=>c.id===g.category)?.color||'var(--accent)',done:false}))];
+  if(!items.length){ms.innerHTML='<div style="font-size:0.78rem;color:var(--text-dim);padding:12px 0">暂无里程碑</div>';return;}
+  ms.innerHTML=items.slice(0,5).map((m,i)=>`<div class="milestone-item"><div class="milestone-dot-wrap"><div class="milestone-dot" style="background:${m.done?'var(--green)':m.color};${m.done?'':'opacity:0.5'}"></div>${i<items.length-1?'<div class="milestone-line"></div>':''}</div><div class="milestone-content"><div class="milestone-title" style="${m.done?'color:var(--text-dim);text-decoration:line-through':''}">${m.title}</div><div class="milestone-date">${m.date}</div></div></div>`).join('');
+}
+
+function renderQuote() {
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById('quoteText').textContent=q.text;
+  document.getElementById('quoteAuthor').textContent='—— '+q.author;
+}
+
+// ============ ACTIONS ============
+function toggleGoal(id){const g=goals.find(x=>x.id===id);if(!g)return;g.completed=!g.completed;g.progress=g.completed?100:Math.min(g.progress,95);if(g.completed&&g.subtasks)g.subtasks.forEach(s=>s.d=true);saveAll();render();}
+function deleteGoal(id){if(!confirm('确定删除此目标？'))return;goals=goals.filter(g=>g.id!==id);saveAll();render();}
+function editProgress(id){const g=goals.find(x=>x.id===id);if(!g)return;const val=prompt('更新进度 (0-100):',g.progress);if(val===null)return;const num=parseInt(val);if(isNaN(num)||num<0||num>100){alert('请输入0-100');return;}g.progress=num;if(num===100){g.completed=true;if(g.subtasks)g.subtasks.forEach(s=>s.d=true);}else g.completed=false;saveAll();render();}
+function toggleSubtask(gid,si){const g=goals.find(x=>x.id===gid);if(!g?.subtasks)return;g.subtasks[si].d=!g.subtasks[si].d;const dc=g.subtasks.filter(s=>s.d).length;g.progress=Math.round(dc/g.subtasks.length*100);g.completed=g.progress===100;saveAll();render();}
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderMain();}
+function selectPriority(el){document.querySelectorAll('#priorityTags .form-tag-option').forEach(t=>t.classList.remove('selected'));el.classList.add('selected');selectedPriority=el.dataset.val;}
+function updateStreakCount(){const sd=JSON.parse(localStorage.getItem('lp_streak')||'{}');let c=0;const t=new Date();for(let i=0;i<365;i++){const d=new Date(t);d.setDate(d.getDate()-i);if(sd[d.toISOString().slice(0,10)])c++;else break;}document.getElementById('streakCount').textContent=c+' 天';}
+
+function openModal(type){
+  const id=type==='goal'?'goalModal':type==='savings'?'savingsModal':type==='budget'?'budgetModal':'recordModal';
+  document.getElementById(id).classList.add('show');
+  if(type==='budget'){
+    document.getElementById('budgetIncome').value=savings.monthlyIncome;
+    document.getElementById('budgetFixed').value=savings.fixedExpenses;
+  }
+}
+function closeModal(e,id){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('show');}
+
+function addGoal(){
+  const title=document.getElementById('goalTitle').value.trim();
+  if(!title){alert('请输入目标名称');return;}
+  goals.unshift({id:Date.now(),title,desc:document.getElementById('goalDesc').value.trim(),category:document.getElementById('goalCategory').value,priority:selectedPriority,deadline:document.getElementById('goalDeadline').value,progress:0,completed:false,created:new Date().toISOString().slice(0,10),subtasks:[]});
+  saveAll();closeModal(null,'goalModal');document.getElementById('goalTitle').value='';document.getElementById('goalDesc').value='';document.getElementById('goalDeadline').value='';render();
+}
+
+function addSavingsGoal(){
+  const name=document.getElementById('svName').value.trim();
+  const target=parseInt(document.getElementById('svTarget').value);
+  if(!name||!target){alert('请填写名称和金额');return;}
+  const colors=['#e8a838','#3dd68c','#5b9cf5','#e87ab4','#9b7aed','#3dd6c8','#e85454','#f5c842'];
+  savings.goals.push({id:Date.now(),name,icon:document.getElementById('svIcon').value,target,current:parseInt(document.getElementById('svCurrent').value)||0,deadline:document.getElementById('svDeadline').value,color:colors[savings.goals.length%colors.length]});
+  saveAll();closeModal(null,'savingsModal');document.getElementById('svName').value='';document.getElementById('svTarget').value='';document.getElementById('svCurrent').value='';render();
+}
+
+function deleteSavingsGoal(id){if(!confirm('确定删除此存款目标？'))return;savings.goals=savings.goals.filter(g=>g.id!==id);saveAll();render();}
+
+function openRecordModal(gid){pendingRecordGoalId=gid;document.getElementById('recordAmount').value='';openModal('record');}
+function confirmRecord(){
+  const amt=parseInt(document.getElementById('recordAmount').value);
+  if(!amt||amt<=0){alert('请输入有效金额');return;}
+  const g=savings.goals.find(x=>x.id===pendingRecordGoalId);
+  if(g){g.current=Math.min(g.target,g.current+amt);}
+  // Also record monthly
+  const now=new Date();
+  const mk=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  if(!monthlyRecords[mk])monthlyRecords[mk]={income:savings.monthlyIncome,fixedExp:savings.fixedExpenses,variableExp:0,saved:0,target:Math.round((savings.monthlyIncome-savings.fixedExpenses)*0.6)};
+  monthlyRecords[mk].saved+=amt;
+  saveAll();closeModal(null,'recordModal');render();
+}
+
+function saveBudget(){
+  savings.monthlyIncome=parseInt(document.getElementById('budgetIncome').value)||0;
+  savings.fixedExpenses=parseInt(document.getElementById('budgetFixed').value)||0;
+  const variable=parseInt(document.getElementById('budgetVariable').value)||0;
+  const now=new Date();
+  const mk=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  if(!monthlyRecords[mk])monthlyRecords[mk]={income:savings.monthlyIncome,fixedExp:savings.fixedExpenses,variableExp:0,saved:0,target:Math.round((savings.monthlyIncome-savings.fixedExpenses)*0.6)};
+  monthlyRecords[mk].income=savings.monthlyIncome;
+  monthlyRecords[mk].fixedExp=savings.fixedExpenses;
+  monthlyRecords[mk].variableExp=variable;
+  saveAll();closeModal(null,'budgetModal');render();
+}
+
+// ============ INIT ============
+function updateDate(){const now=new Date();const days=['日','一','二','三','四','五','六'];document.getElementById('headerDate').textContent=`${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} 周${days[now.getDay()]}`;}
+
+updateDate();
+generateMonthlyPlan();
+saveAll();
+render();
+</script>
+</body>
+</html>
